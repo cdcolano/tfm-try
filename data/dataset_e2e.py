@@ -220,7 +220,7 @@ class dataloader(Dataset):
                     xi,yi,hi,wi = np.array(info['2d_bbox'])/512 #TODO NO ENTIENDO PORQUE ENTRE 512
                     xi = xi+hi/2
                     yi = yi+wi/2
-                    bbox, anom_type = torch.Tensor([xi,yi,hi,wi]), self.type_dict[info['config']['type']]
+                    bbox, anom_type = torch.Tensor([xi,yi,hi,wi]), self.type_dict[(info['config'])['type']]
                 # imgs = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
                 # transformed = self.transform_box(image = imgs, bboxes = bbox.unsqueeze(0), class_labels = ['none'])
                 # imgs, bbox = transformed['image'], torch.Tensor(transformed['bboxes']).squeeze()

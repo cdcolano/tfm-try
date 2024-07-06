@@ -475,15 +475,8 @@ def forward_cmt(batch, models, optimizer = None, is_train = True, topk = 100):
     output = {}
     
     imgs, mesh, labels, bbox, pos_enc3d = batch['imgs'], batch['mesh'], batch['labels'], batch['bbox'], batch['pos_enc3d'] 
-    print(imgs.shape)
-    print(mesh.shape)
-    print(labels.shape)
-    print(bbox.shape)
-    print(pos_enc3d.shape)
-    print("TERMINATO")
 
     [encoder, encoder_ema, projector, projector_ema, attention_decoder, local_contrast] = models
-    
     imgs = imgs.cuda()
     mesh = mesh.cuda()
     labels = labels.cuda()
@@ -523,7 +516,6 @@ def forward_cmt(batch, models, optimizer = None, is_train = True, topk = 100):
         mask = None
 
     logits, pred_bbox = attention_decoder(query_feat, mesh_feat, mask=mask, pos_enc3d=pos_enc3d)
-
     output.update({'pred':logits, 'pred_bbox':pred_bbox})
 
     output['pred_label'] = (torch.sigmoid(output['pred'])>0.5).float()[:,0]
@@ -646,17 +638,15 @@ def train(train_dataset, test_dataset, models, optimizer, lr_scheduler, device, 
 
             if len(batch['imgs']) != train_dataset.batch_size:
                 continue
-            print("CONTINUA")
-            print(args.distributed)
             if not args.no_contr_loss:
                 models, optimizer, log_loss_contr = forward_vlfa(batch, models, optimizer, mode = 'wsl', distributed=args.distributed)
-
+            
             models, optimizer, log_loss_cl_bbox, output = forward_cmt(batch, models, optimizer, topk = args.topk)
 
             acc_list.append(output['accuracy'])
             bbox_acc_list += output['bbox_accu'].tolist()
             iou_list += output['mean_iou']
-
+            
             if i%args.save_wandb_logs_every_iters == 0 and is_main_process():
 
                 try:

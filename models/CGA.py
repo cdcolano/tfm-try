@@ -45,8 +45,7 @@ class CGA_decoder(nn.Module):
         t = repeat(self.token.weight, 'n c -> b n c', b  = q.shape[0])
         qt = torch.cat([t,q],1)
         pos = self.map_to_pos_enc(rearrange(self.ff_pos_enc(pos_enc3d),  'b n h w c -> b (n h w) c'))
-        print(k.shape)
-        print(pos.shape)
+        
         o = self.crossatten(qt, context = torch.cat([k, pos], -1) , mask = mask)
 
         ot = o[:,0]
