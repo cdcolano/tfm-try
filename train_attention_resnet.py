@@ -51,15 +51,18 @@ class SelfAttentionBlock(nn.Module):
         self.linear = nn.Linear(d_model, d_model)
 
     def forward(self, x):
-        x = x.flatten(2).permute(2, 0, 1)  # (B, C, H, W) -> (HW, B, C)
-        x = self.transformer_encoder(x)
-        x = x.permute(1, 2, 0).view(x.size(1), x.size(2), int(x.size(0)**0.5), int(x.size(0)**0.5))  # (HW, B, C) -> (B, C, H, W)
+        B, C, H, W = x.size()  # (B, 512, 7, 7)
+        x = x.flatten(2).permute(2, 0, 1)  # (B, 512, 7*7) -> (49, B, 512)
+        x = self.transformer_encoder(x)  # (49, B, 512)
+        x = x.permute(1, 2, 0).view(B, C, H, W)  # (49, B, 512) -> (B, 512, 7, 7)
         return self.linear(x)
 
 class AttentionResNet(nn.Module):
     def __init__(self, num_classes=2, pretrained=True):
         super(AttentionResNet, self).__init__()
         self.resnet = models.resnet18(pretrained=pretrained)
+        self.resnet.layer4[0].conv1.stride = (1, 1)  # Remove the stride in layer4
+        self.resnet.layer4[0].downsample[0].stride = (1, 1)
         self.self_attention = SelfAttentionBlock(d_model=512, nhead=8, num_layers=1)
         self.fc = nn.Linear(512, num_classes)
         
@@ -80,6 +83,7 @@ class AttentionResNet(nn.Module):
         x = torch.flatten(x, 1)
         x = self.fc(x)
         return x
+
 
 def main():
     args, unknown = parse_args()
