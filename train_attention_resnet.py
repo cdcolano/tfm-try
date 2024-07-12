@@ -48,14 +48,13 @@ class SelfAttentionBlock(nn.Module):
         super(SelfAttentionBlock, self).__init__()
         encoder_layers = nn.TransformerEncoderLayer(d_model, nhead, dim_feedforward, dropout)
         self.transformer_encoder = nn.TransformerEncoder(encoder_layers, num_layers)
-        self.linear = nn.Linear(d_model, d_model)
 
     def forward(self, x):
         B, C, H, W = x.size()  # (B, 512, 7, 7)
         x = x.flatten(2).permute(2, 0, 1)  # (B, 512, 7*7) -> (49, B, 512)
         x = self.transformer_encoder(x)  # (49, B, 512)
         x = x.permute(1, 2, 0).view(B, C, H, W)  # (49, B, 512) -> (B, 512, 7, 7)
-        return self.linear(x)
+        return x
 
 class AttentionResNet(nn.Module):
     def __init__(self, num_classes=2, pretrained=True):
