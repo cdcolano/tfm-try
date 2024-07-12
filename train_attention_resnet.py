@@ -8,7 +8,7 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from torchvision.models import resnet18
 from torch.nn import TransformerEncoder, TransformerEncoderLayer
 from tqdm import tqdm
-from custom_dataloader import get_dataloaders  # Replace with the actual name of your script file
+from data.dataset_e2e import get_dataloaders
 
 class SelfAttentionBlock(nn.Module):
     def __init__(self, d_model, nhead, num_layers, dim_feedforward=2048, dropout=0.1):
