@@ -9,7 +9,6 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from torchvision import models
 from tqdm import tqdm
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
-from custom_dataloader import get_dataloaders  # Replace with the actual name of your script file
 
 # Disable cuDNN to avoid unsupported errors
 import torch.backends.cudnn as cudnn
