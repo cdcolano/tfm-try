@@ -163,4 +163,22 @@ def main():
         if not args.distributed or (args.distributed and args.local_rank == 0):
             print(f'Epoch {epoch+1}/{args.epochs}, Train Loss: {train_loss:.4f}')
 
+
+            os.makedirs(args.save_path, exist_ok=True)
+            torch.save(model.state_dict(), os.path.join(args.save_path, f'resnet18_epoch{epoch+1}.pth'))
+
+    # Validate only after the last epoch
+    if not args.distributed or (args.distributed and args.local_rank == 0):
+        test_loss, test_accuracy, test_f1, test_precision, test_recall, test_roc_auc = validate(model, test_loader, criterion, device)
+        print(f'Final Validation, '
+              f'Test Loss: {test_loss:.4f}, '
+              f'Test Accuracy: {test_accuracy:.2f}%, '
+              f'F1 Score: {test_f1:.4f}, '
+              f'Precision: {test_precision:.4f}, '
+              f'Recall: {test_recall:.4f}, '
+              f'ROC AUC: {test_roc_auc:.4f}')
+
+if __name__ == '__main__':
+    # Set TORCH_DISTRIBUTED_DEBUG environment variable for more debugging information
+    main()
             # Save the model after each
