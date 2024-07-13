@@ -1,0 +1,38 @@
+NODELIST=r2i7n6
+MASTER_ADDR=r2i7n6
+#dataset:[train] total 105007 -> 55853 good and 49154 bad images
+#dataset:[test] total 29229 -> 15572 good and 13657 bad images
+constructing SpatialTransformer of depth 3 w/ 128 channels and 8 heads
+WARNING: SpatialTransformer: Found context dims [256] of depth 1, which does not match the specified 'depth' of 3. Setting context_dim to [256, 256, 256] now.
+Setting up MemoryEfficientCrossAttention. Query dim is 512, context_dim is None and using 8 heads with a dimension of 64.
+Setting up MemoryEfficientCrossAttention. Query dim is 512, context_dim is 256 and using 8 heads with a dimension of 64.
+Setting up MemoryEfficientCrossAttention. Query dim is 512, context_dim is None and using 8 heads with a dimension of 64.
+Setting up MemoryEfficientCrossAttention. Query dim is 512, context_dim is 256 and using 8 heads with a dimension of 64.
+Setting up MemoryEfficientCrossAttention. Query dim is 512, context_dim is None and using 8 heads with a dimension of 64.
+Setting up MemoryEfficientCrossAttention. Query dim is 512, context_dim is 256 and using 8 heads with a dimension of 64.
+model loaded successfully
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : [Errno 2] No such file or directory: '../data/normals//100837/renders/camera192_3_.npy'
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+topk: 100
+{'roc_auc': 0.7056, 'accuracy': 0.6429, 'good_accuracy': 0.6909, 'bad_accuracy': 0.5878, 'precision': 0.6233, 'recall': 0.5878, 'f1': 0.605, 'iou': 0.2194, 'BoxAcc': 0.2175}
