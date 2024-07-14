@@ -85,8 +85,16 @@ def build_vit_model(num_labels, resume_ckpt, device):
     model = model.to(device)
 
     if resume_ckpt is not None:
-        ckpt = torch.load(resume_ckpt)
-        model.load_state_dict(ckpt)
+        ckpt = torch.load(resume_ckpt, map_location=lambda storage, loc: storage)
+
+        # Remove "module." prefix from keys
+        state_dict = ckpt["model_state_dict"]
+        new_state_dict = {}
+        for k, v in state_dict.items():
+            new_key = k.replace("module.", "")
+            new_state_dict[new_key] = v
+
+        model.load_state_dict(new_state_dict)
         if is_main_process():  
             print('model loaded successfully')
 
