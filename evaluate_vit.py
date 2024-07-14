@@ -75,7 +75,7 @@ def main(args):
     if args.distributed:
         init_distributed()
 
-    num_mesh_images = [5, 5]
+    num_mesh_images = 5
     _, test_loader = get_dataloaders(args, num_mesh_images = [-1,num_mesh_images])
 
     model = load_model(args.resume_ckpt, args.device)
