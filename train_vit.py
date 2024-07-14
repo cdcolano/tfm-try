@@ -85,8 +85,8 @@ def build_vit_model(num_labels, resume_ckpt, device):
     model = model.to(device)
 
     if resume_ckpt is not None:
-        ckpt = torch.load(resume_ckpt, map_location=lambda storage, loc: storage)
-        model.load_state_dict(ckpt["model_state_dict"])
+        ckpt = torch.load(resume_ckpt)
+        model.load_state_dict(ckpt)
         if is_main_process():  
             print('model loaded successfully')
 
@@ -119,7 +119,7 @@ def train_vit(train_dataset, test_dataset, model, optimizer, lr_scheduler, devic
                 {
                     "model_state_dict": model.state_dict(),
                 },
-                os.path.join(args.ckpt_path, f"model_{str(epoch).zfill(6)}.pt")
+                os.path.join(args.ckpt_path, f"vit_{str(epoch).zfill(6)}.pt")
             )
 
 def main(args):
