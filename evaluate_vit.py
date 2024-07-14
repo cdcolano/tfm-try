@@ -101,6 +101,7 @@ if __name__ == "__main__":
     parser.add_argument('--distributed', action='store_true', help='Use distributed evaluation')
     parser.add_argument('--device', type=str, default='cuda', help='Device to run the evaluation on')
     parser.add_argument('--resume_ckpt', type=str, required=True, help='Path to the checkpoint to evaluate')
+    parser.add_argument('--n_pnts', type=int, default=32, help='Number of points for the dataset')  # Added this line
     args, unknown = parser.parse_known_args()
 
     main(args)
