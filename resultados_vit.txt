@@ -1,0 +1,98 @@
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : [Errno 2] No such file or directory: '../data/normals//100837/renders/camera192_3_.npy'
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : [Errno 2] No such file or directory: '../data/normals//100837/renders/camera192_3_.npy'
+An error occurred in get_item : 
+An error occurred in get_item : [Errno 2] No such file or directory: '../data/normals//100837/renders/camera192_3_.npy'
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+An error occurred in get_item : 
+Accuracy: 0.5338
+AUC: 0.5053
+F1 Score: 0.0000
+Precision: 0.0000
+Recall: 0.0000
+
+RESULTADOS RESNET
+Final Validation, Test Loss: 0.6676, Test Accuracy: 58.40%, F1 Score: 0.5370, Precision: 0.5568, Recall: 0.5186, ROC AUC: 0.6203
