@@ -302,7 +302,8 @@ class dataloader(Dataset):
             traceback.print_exc()
             return None
 
-def collate_fn(batch):
+
+def custom_collate_fn(batch):
     # Filter out None elements in case of any faulty data points
     batch = list(filter(lambda x: x is not None, batch))
 
@@ -342,8 +343,13 @@ def collate_fn(batch):
                 # If the tensors have different shapes, pad them as needed
                 tensors = [d[key] for d in batch]
                 max_shape = [max([tensor.size(dim) for tensor in tensors]) for dim in range(tensors[0].dim())]
-                padded_tensors = torch.stack([torch.nn.functional.pad(tensor, (0, max_shape[dim] - tensor.size(dim))) for tensor in tensors])
-                collated_batch[key] = padded_tensors
+                padded_tensors = []
+                for tensor in tensors:
+                    padding = [0] * (2 * tensor.dim())
+                    for dim, size in enumerate(max_shape):
+                        padding[2 * dim + 1] = size - tensor.size(dim)
+                    padded_tensors.append(torch.nn.functional.pad(tensor, padding))
+                collated_batch[key] = torch.stack(padded_tensors)
             else:
                 collated_batch[key] = default_collate([d[key] for d in batch])
 
