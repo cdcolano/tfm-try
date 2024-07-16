@@ -13,6 +13,8 @@ from torch.utils.data import Dataset
 import h5py
 import albumentations as A
 import traceback
+from torch.utils.data._utils.collate import default_collate
+
 
 def fps(points, n_samples):
     """
@@ -301,17 +303,52 @@ class dataloader(Dataset):
             return None
 
 def collate_fn(batch):
+    # Filter out None elements in case of any faulty data points
     batch = list(filter(lambda x: x is not None, batch))
-    return torch.utils.data.dataloader.default_collate(batch)
+
+    if len(batch) == 0:
+        return None
+
+    try:
+        # Handle the 'mesh' key separately
+        mesh_list = [item['mesh'] for item in batch]
+        
+        # Find the maximum length in the batch
+        max_length = max(len(mesh) for mesh in mesh_list)
+        
+        # Pad the meshes to the maximum length
+        padded_mesh_list = []
+        for mesh in mesh_list:
+            padded_mesh = torch.zeros((max_length, *mesh.shape[1:]), dtype=mesh.dtype)
+            padded_mesh[:len(mesh)] = mesh
+            padded_mesh_list.append(padded_mesh)
+        
+        # Convert to a tensor
+        collated_meshes = torch.stack(padded_mesh_list, dim=0)
+        
+        # Use default_collate for the rest of the keys
+        collated_batch = {key: default_collate([d[key] for d in batch if key != 'mesh']) for key in batch[0] if key != 'mesh'}
+        
+        # Add the padded meshes to the batch
+        collated_batch['mesh'] = collated_meshes
+
+        return collated_batch
+    except Exception as e:
+        print(f"Error during collation: {e}")
+        raise
+
+# def collate_fn(batch):
+#     batch = list(filter(lambda x: x is not None, batch))
+#     return torch.utils.data.dataloader.default_collate(batch)
 
 def data_sampler(dataset, shuffle, distributed):
     if distributed:
         return torch.utils.data.distributed.DistributedSampler(dataset, shuffle=shuffle)
-    # if shuffle:
-    #     #print(dataset)
-    #     return torch.utils.data.RandomSampler(dataset)
-    # else:
-    return torch.utils.data.SequentialSampler(dataset)
+    if shuffle:
+        #print(dataset)
+        return torch.utils.data.RandomSampler(dataset)
+    else:
+        return torch.utils.data.SequentialSampler(dataset)
 
 def get_dataloaders(args, num_mesh_images = [5,5]):
 
