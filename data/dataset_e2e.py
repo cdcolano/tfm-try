@@ -310,27 +310,47 @@ def collate_fn(batch):
         return None
 
     try:
-        # Handle the 'mesh' key separately
+        # Handle 'mesh', 'cam_poses', and 'pos_enc3d' keys separately
         mesh_list = [item['mesh'] for item in batch]
-        
+        cam_poses_list = [item['cam_poses'] for item in batch]
+        pos_enc3d_list = [item['pos_enc3d'] for item in batch]
+
         # Find the maximum length in the batch
-        max_length = max(len(mesh) for mesh in mesh_list)
-        
-        # Pad the meshes to the maximum length
-        padded_mesh_list = []
-        for mesh in mesh_list:
-            padded_mesh = torch.zeros((max_length, *mesh.shape[1:]), dtype=mesh.dtype)
-            padded_mesh[:len(mesh)] = mesh
-            padded_mesh_list.append(padded_mesh)
-        
-        # Convert to a tensor
-        collated_meshes = torch.stack(padded_mesh_list, dim=0)
-        
-        # Use default_collate for the rest of the keys
-        collated_batch = {key: default_collate([d[key] for d in batch if key != 'mesh']) for key in batch[0] if key != 'mesh'}
-        
-        # Add the padded meshes to the batch
+        max_mesh_length = max(len(mesh) for mesh in mesh_list)
+        max_cam_poses_length = max(len(cam) for cam in cam_poses_list)
+        max_pos_enc3d_length = max(len(pos) for pos in pos_enc3d_list)
+
+        # Pad the tensors to the maximum length
+        def pad_tensor_list(tensor_list, max_length):
+            padded_tensor_list = []
+            for tensor in tensor_list:
+                padded_tensor = torch.zeros((max_length, *tensor.shape[1:]), dtype=tensor.dtype)
+                padded_tensor[:len(tensor)] = tensor
+                padded_tensor_list.append(padded_tensor)
+            return torch.stack(padded_tensor_list, dim=0)
+
+        collated_meshes = pad_tensor_list(mesh_list, max_mesh_length)
+        collated_cam_poses = pad_tensor_list(cam_poses_list, max_cam_poses_length)
+        collated_pos_enc3d = pad_tensor_list(pos_enc3d_list, max_pos_enc3d_length)
+
+        # Use default_collate for the rest of the keys, ensuring consistent shapes
+        collated_batch = {}
+        for key in batch[0]:
+            if key in ['mesh', 'cam_poses', 'pos_enc3d']:
+                continue
+            if isinstance(batch[0][key], torch.Tensor):
+                # If the tensors have different shapes, pad them as needed
+                tensors = [d[key] for d in batch]
+                max_shape = [max([tensor.size(dim) for tensor in tensors]) for dim in range(tensors[0].dim())]
+                padded_tensors = torch.stack([torch.nn.functional.pad(tensor, (0, max_shape[dim] - tensor.size(dim))) for tensor in tensors])
+                collated_batch[key] = padded_tensors
+            else:
+                collated_batch[key] = default_collate([d[key] for d in batch])
+
+        # Add the padded tensors to the batch
         collated_batch['mesh'] = collated_meshes
+        collated_batch['cam_poses'] = collated_cam_poses
+        collated_batch['pos_enc3d'] = collated_pos_enc3d
 
         return collated_batch
     except Exception as e:
