@@ -96,3 +96,8 @@ Recall: 0.0000
 
 RESULTADOS RESNET
 Final Validation, Test Loss: 0.6676, Test Accuracy: 58.40%, F1 Score: 0.5370, Precision: 0.5568, Recall: 0.5186, ROC AUC: 0.6203
+ATTENTION RESNET
+Final Validation, Test Loss: 1.0304, Test Accuracy: 62.98%, F1 Score: 0.6557, Precision: 0.5778, Recall: 0.7578, ROC AUC: 0.7056
+
+MI MODELO
+{'roc_auc': 0.7056, 'accuracy': 0.6429, 'good_accuracy': 0.6909, 'bad_accuracy': 0.5878, 'precision': 0.6233, 'recall': 0.5878, 'f1': 0.605, 'iou': 0.2194, 'BoxAcc': 0.2175}

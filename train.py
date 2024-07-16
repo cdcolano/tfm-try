@@ -6,7 +6,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-import time, cv2, torch, wandb, sys,copy, math
+import time, torch, wandb, sys,copy, math
 import torch.distributed as dist
 from torch import nn, optim
 from tqdm import tqdm

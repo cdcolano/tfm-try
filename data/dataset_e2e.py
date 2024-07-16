@@ -255,9 +255,11 @@ class dataloader(Dataset):
             img_c = self.to_image_tensor(color_img_path, aug = self.mode == 'train')
 
             if self.mode == 'train':
-                ref_mesh_path_select = np.random.choice(ref_mesh_path, self.num_mesh_images)
+                num_images_to_select = min(self.num_mesh_images, len(ref_mesh_path))
+                ref_mesh_path_select = np.random.choice(ref_mesh_path, num_images_to_select, replace=False)
             else:
-                ref_mesh_path_select = np.random.choice(ref_mesh_path, self.num_mesh_images)
+                num_images_to_select = min(self.num_mesh_images, len(ref_mesh_path))
+                ref_mesh_path_select = np.random.choice(ref_mesh_path, num_images_to_select, replace=False)
             mesh = torch.stack([self.get_mesh_image_tensor(i) for i in ref_mesh_path_select if i.endswith('.png')],0)
             cam_poses = []
             for i in ref_mesh_path_select:
@@ -305,11 +307,11 @@ def collate_fn(batch):
 def data_sampler(dataset, shuffle, distributed):
     if distributed:
         return torch.utils.data.distributed.DistributedSampler(dataset, shuffle=shuffle)
-    if shuffle:
-        #print(dataset)
-        return torch.utils.data.RandomSampler(dataset)
-    else:
-        return torch.utils.data.SequentialSampler(dataset)
+    # if shuffle:
+    #     #print(dataset)
+    #     return torch.utils.data.RandomSampler(dataset)
+    # else:
+    return torch.utils.data.SequentialSampler(dataset)
 
 def get_dataloaders(args, num_mesh_images = [5,5]):
 
@@ -348,4 +350,6 @@ def get_dataloaders(args, num_mesh_images = [5,5]):
     )      
 
     return train_loader, test_loader 
+
+
 
