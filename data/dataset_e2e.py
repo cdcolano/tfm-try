@@ -303,7 +303,7 @@ class dataloader(Dataset):
             return None
 
 
-def custom_collate_fn(batch):
+def collate_fn(batch):
     # Filter out None elements in case of any faulty data points
     batch = list(filter(lambda x: x is not None, batch))
 
