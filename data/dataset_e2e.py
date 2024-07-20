@@ -16,13 +16,14 @@ import traceback
 from torch.utils.data._utils.collate import default_collate
 from skimage.metrics import structural_similarity as ssim
 
-def remove_background(image_tensor):
-    gray_image = cv2.cvtColor(np.array(image_tensor), cv2.COLOR_RGB2GRAY)
-    _, binary_mask = cv2.threshold(gray_image, 1, 255, cv2.THRESH_BINARY)
-    masked_image = cv2.bitwise_and(np.array(image_tensor), np.array(image_tensor), mask=binary_mask)
-    return Image.fromarray(masked_image)
+def remove_background(image_path):
+    input_image = Image.open(image_path)
+    #output_image = remove(input_image)
+    return input_image.convert('L') 
 
 def compute_similarity(img1, img2):
+    img1 = np.array(img1)
+    img2 = np.array(img2)
     return ssim(img1, img2)
 
 def fps(points, n_samples):
@@ -264,8 +265,14 @@ class dataloader(Dataset):
             img_v1 = self.get_mesh_image_tensor(random_2_views[0]) 
             img_v2 = self.get_mesh_image_tensor(random_2_views[1]) 
             img_c = self.to_image_tensor(color_img_path, aug = self.mode == 'train')
-            img_query = remove_background(Image.open(img_path).convert('L'))
-            similarities = [compute_similarity(np.array(img_query), np.array(Image.open(mesh_path).convert('L'))) for mesh_path in ref_mesh_path]
+            img_query = remove_background(img_path)
+            img_query_np = np.array(img_query)
+            similarities = []
+            for mesh_img_path in ref_mesh_path:
+                mesh_img = Image.open(mesh_img_path) # Convert to grayscale
+                mesh_img_np = np.array(mesh_img)
+                sim = compute_similarity(img_query_np, mesh_img_np)
+                similarities.append(sim)
             num_mesh_images=min(self.num_mesh_images, len(ref_mesh_path))
             top_similar_indices = np.argsort(similarities)[-num_mesh_images:]
             ref_mesh_path_select = [ref_mesh_path[i] for i in top_similar_indices]
