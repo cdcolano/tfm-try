@@ -14,7 +14,16 @@ import h5py
 import albumentations as A
 import traceback
 from torch.utils.data._utils.collate import default_collate
+from skimage.metrics import structural_similarity as ssim
 
+def remove_background(image_tensor):
+    gray_image = cv2.cvtColor(np.array(image_tensor), cv2.COLOR_RGB2GRAY)
+    _, binary_mask = cv2.threshold(gray_image, 1, 255, cv2.THRESH_BINARY)
+    masked_image = cv2.bitwise_and(np.array(image_tensor), np.array(image_tensor), mask=binary_mask)
+    return Image.fromarray(masked_image)
+
+def compute_similarity(img1, img2):
+    return ssim(img1, img2)
 
 def fps(points, n_samples):
     """
@@ -255,14 +264,19 @@ class dataloader(Dataset):
             img_v1 = self.get_mesh_image_tensor(random_2_views[0]) 
             img_v2 = self.get_mesh_image_tensor(random_2_views[1]) 
             img_c = self.to_image_tensor(color_img_path, aug = self.mode == 'train')
-
-            if self.mode == 'train':
-                num_images_to_select = min(self.num_mesh_images, len(ref_mesh_path))
-                ref_mesh_path_select = np.random.choice(ref_mesh_path, num_images_to_select, replace=False)
-            else:
-                num_images_to_select = min(self.num_mesh_images, len(ref_mesh_path))
-                ref_mesh_path_select = np.random.choice(ref_mesh_path, num_images_to_select, replace=False)
-            mesh = torch.stack([self.get_mesh_image_tensor(i) for i in ref_mesh_path_select if i.endswith('.png')],0)
+            img_query = remove_background(Image.open(img_path).convert('L'))
+            similarities = [compute_similarity(np.array(img_query), np.array(Image.open(mesh_path).convert('L'))) for mesh_path in ref_mesh_path]
+            num_mesh_images=min(self.num_mesh_images, len(ref_mesh_path))
+            top_similar_indices = np.argsort(similarities)[-num_mesh_images:]
+            ref_mesh_path_select = [ref_mesh_path[i] for i in top_similar_indices]
+            mesh = torch.stack([self.get_mesh_image_tensor(i) for i in ref_mesh_path_select if i.endswith('.png')], 0)
+            # if self.mode == 'train':
+            #     num_images_to_select = min(self.num_mesh_images, len(ref_mesh_path))
+            #     ref_mesh_path_select = np.random.choice(ref_mesh_path, num_images_to_select, replace=False)
+            # else:
+            #     num_images_to_select = min(self.num_mesh_images, len(ref_mesh_path))
+            #     ref_mesh_path_select = np.random.choice(ref_mesh_path, num_images_to_select, replace=False)
+            # mesh = torch.stack([self.get_mesh_image_tensor(i) for i in ref_mesh_path_select if i.endswith('.png')],0)
             cam_poses = []
             for i in ref_mesh_path_select:
                 with open(i.replace('.png','.json'), 'r') as fi:
