@@ -27,6 +27,7 @@ from utils.box_utils import bbox_iou, xywh2xyxy, xyxy2xywh, generalized_box_iou
 from utils.visualize import obtain_vis_maps
 from einops import rearrange, reduce, repeat 
 import torch.nn.functional as F
+import json
 
 #os.environ["WANDB_API_KEY"] = "XXXX" ## enter your wandb token here.
 os.environ["WANDB_MODE"] = "offline"
@@ -564,8 +565,10 @@ def test(args, test_dataset, models):
     type_dict = {'position':1, 'rotate':2, 'missing':3, 'damaged':4, 'swapped':5}
     type_dict = {j:i for i,j in type_dict.items()}
 
-    for batch in tqdm(test_dataset):
+    predictions = []
 
+    for batch in tqdm(test_dataset):
+        paths = batch['path']
         with torch.no_grad():
             output_dict = forward_cmt(batch, models, is_train = False, topk = args.topk)
             
@@ -578,6 +581,12 @@ def test(args, test_dataset, models):
             bbox_accu, mean_iou = output_dict['bbox_accu'], output_dict['mean_iou']
             all_ious  +=  mean_iou
             all_bboxaccus  +=  bbox_accu.tolist()
+
+            for i in range(len(output_dict['pred_label'])):
+                pred_box = output_dict['pred_box'][i].tolist()  # Convert to list for JSON serialization
+                pred_label = output_dict['pred_label'][i].item()  # Convert to a scalar for JSON serialization
+                path = paths[i]  # Get the corresponding path
+                predictions.append({'pred_box': pred_box, 'pred_label': pred_label, 'path': path})
 
     all_labels_cat = torch.cat(all_labels,0)
     all_preds_cat = torch.cat(all_preds,0)
@@ -604,6 +613,8 @@ def test(args, test_dataset, models):
         result['iou'] = sum(all_ious)/len(all_ious)
         result['BoxAcc'] = sum(all_bboxaccus)/len(all_bboxaccus)
 
+    with open('predictions_{}.json'.format(dist.get_rank()), 'w') as f:
+        json.dump(predictions, f, indent=4)
     return result
 
 def train(train_dataset, test_dataset, models, optimizer, lr_scheduler, device, wandb):
