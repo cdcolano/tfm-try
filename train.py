@@ -583,10 +583,10 @@ def test(args, test_dataset, models):
             all_bboxaccus  +=  bbox_accu.tolist()
 
             for i in range(len(output_dict['pred_label'])):
-                pred_box = output_dict['pred_box'][i].tolist()  # Convert to list for JSON serialization
+                pred_box = output_dict['pred_bbox'][i].tolist()  # Convert to list for JSON serialization
                 pred_label = output_dict['pred_label'][i].item()  # Convert to a scalar for JSON serialization
                 path = paths[i]  # Get the corresponding path
-                predictions.append({'pred_box': pred_box, 'pred_label': pred_label, 'path': path})
+                predictions.append({'pred_bbox': pred_box, 'pred_label': pred_label, 'path': path})
 
     all_labels_cat = torch.cat(all_labels,0)
     all_preds_cat = torch.cat(all_preds,0)
