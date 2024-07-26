@@ -272,11 +272,34 @@ class dataloader(Dataset):
                 mesh_img = Image.open(mesh_img_path) # Convert to grayscale
                 mesh_img_np = np.array(mesh_img)
                 sim = compute_similarity(img_query_np, mesh_img_np)
-                similarities.append(sim)
-            num_mesh_images=min(self.num_mesh_images, len(ref_mesh_path))
-            top_similar_indices = np.argsort(similarities)[-num_mesh_images:]
-            ref_mesh_path_select = [ref_mesh_path[i] for i in top_similar_indices]
-            mesh = torch.stack([self.get_mesh_image_tensor(i) for i in ref_mesh_path_select if i.endswith('.png')], 0)
+                similarities.append((mesh_img_path, sim))
+            similarities.sort(key=lambda x: x[1], reverse=True)
+
+            #num_mesh_images=min(self.num_mesh_images, len(ref_mesh_path))
+            #top_similar_indices = np.argsort(similarities)[-num_mesh_images:]
+            #ref_mesh_path_select = [ref_mesh_path[i] for i in top_similar_indices]
+            
+            selected_paths = []
+            selected_cameras = set()
+            
+            # Ensure unique camera selection in order of their SSIM scores
+            for mesh_img_path, sim in similarities:
+                camera_id = mesh_img_path.split('_')[0]
+                if camera_id not in selected_cameras:
+                    selected_paths.append(mesh_img_path)
+                    selected_cameras.add(camera_id)
+                if len(selected_paths) >= self.num_mesh_images:
+                    break
+
+            # If limit is not reached, fill with remaining highest-scoring views
+            if len(selected_paths) < self.num_mesh_images:
+                for mesh_img_path, sim in similarities:
+                    if mesh_img_path not in selected_paths:
+                        selected_paths.append(mesh_img_path)
+                        if len(selected_paths) >= self.num_mesh_images:
+                            break
+            ref_mesh_path_select=selected_paths
+            mesh = torch.stack([self.get_mesh_image_tensor(i) for i in selected_paths if i.endswith('.png')], 0)
             # if self.mode == 'train':
             #     num_images_to_select = min(self.num_mesh_images, len(ref_mesh_path))
             #     ref_mesh_path_select = np.random.choice(ref_mesh_path, num_images_to_select, replace=False)
@@ -391,9 +414,9 @@ def collate_fn(batch):
 def data_sampler(dataset, shuffle, distributed):
     if distributed:
         return torch.utils.data.distributed.DistributedSampler(dataset, shuffle=shuffle)
-    if shuffle:
-        #print(dataset)
-        return torch.utils.data.RandomSampler(dataset)
+    # if shuffle:
+    #     #print(dataset)
+    #     return torch.utils.data.RandomSampler(dataset)
     else:
         return torch.utils.data.SequentialSampler(dataset)
 
