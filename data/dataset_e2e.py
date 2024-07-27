@@ -265,41 +265,42 @@ class dataloader(Dataset):
             img_v1 = self.get_mesh_image_tensor(random_2_views[0]) 
             img_v2 = self.get_mesh_image_tensor(random_2_views[1]) 
             img_c = self.to_image_tensor(color_img_path, aug = self.mode == 'train')
-            img_query = remove_background(img_path)
-            img_query_np = np.array(img_query)
-            similarities = []
-            for mesh_img_path in ref_mesh_path:
-                mesh_img = Image.open(mesh_img_path) # Convert to grayscale
-                mesh_img_np = np.array(mesh_img)
-                sim = compute_similarity(img_query_np, mesh_img_np)
-                similarities.append((mesh_img_path, sim))
-            similarities.sort(key=lambda x: x[1], reverse=True)
+            #img_query = remove_background(img_path)
+            #img_query_np = np.array(img_query)
+            #similarities = []
+            # for mesh_img_path in ref_mesh_path:
+            #     mesh_img = Image.open(mesh_img_path) # Convert to grayscale
+            #     mesh_img_np = np.array(mesh_img)
+            #     sim = compute_similarity(img_query_np, mesh_img_np)
+            #     similarities.append((mesh_img_path, sim))
+            # similarities.sort(key=lambda x: x[1], reverse=True)
 
-            #num_mesh_images=min(self.num_mesh_images, len(ref_mesh_path))
-            #top_similar_indices = np.argsort(similarities)[-num_mesh_images:]
-            #ref_mesh_path_select = [ref_mesh_path[i] for i in top_similar_indices]
+            # #num_mesh_images=min(self.num_mesh_images, len(ref_mesh_path))
+            # #top_similar_indices = np.argsort(similarities)[-num_mesh_images:]
+            # #ref_mesh_path_select = [ref_mesh_path[i] for i in top_similar_indices]
             
-            selected_paths = []
-            selected_cameras = set()
+            # selected_paths = []
+            # selected_cameras = set()
             
-            # Ensure unique camera selection in order of their SSIM scores
-            for mesh_img_path, sim in similarities:
-                camera_id = mesh_img_path.split('_')[0]
-                if camera_id not in selected_cameras:
-                    selected_paths.append(mesh_img_path)
-                    selected_cameras.add(camera_id)
-                if len(selected_paths) >= self.num_mesh_images:
-                    break
+            # # Ensure unique camera selection in order of their SSIM scores
+            # for mesh_img_path, sim in similarities:
+            #     camera_id = mesh_img_path.split('_')[0]
+            #     if camera_id not in selected_cameras:
+            #         selected_paths.append(mesh_img_path)
+            #         selected_cameras.add(camera_id)
+            #     if len(selected_paths) >= self.num_mesh_images:
+            #         break
 
-            # If limit is not reached, fill with remaining highest-scoring views
-            if len(selected_paths) < self.num_mesh_images:
-                for mesh_img_path, sim in similarities:
-                    if mesh_img_path not in selected_paths:
-                        selected_paths.append(mesh_img_path)
-                        if len(selected_paths) >= self.num_mesh_images:
-                            break
-            ref_mesh_path_select=selected_paths
-            mesh = torch.stack([self.get_mesh_image_tensor(i) for i in selected_paths if i.endswith('.png')], 0)
+            # # If limit is not reached, fill with remaining highest-scoring views
+            # if len(selected_paths) < self.num_mesh_images:
+            #     for mesh_img_path, sim in similarities:
+            #         if mesh_img_path not in selected_paths:
+            #             selected_paths.append(mesh_img_path)
+            #             if len(selected_paths) >= self.num_mesh_images:
+            #                 break
+            #ref_mesh_path_select=selected_paths
+            ref_mesh_path_select = np.random.choice(ref_mesh_path, self.num_mesh_images)
+            mesh = torch.stack([self.get_mesh_image_tensor(i) for i in ref_mesh_path_select if i.endswith('.png')], 0)
             # if self.mode == 'train':
             #     num_images_to_select = min(self.num_mesh_images, len(ref_mesh_path))
             #     ref_mesh_path_select = np.random.choice(ref_mesh_path, num_images_to_select, replace=False)
