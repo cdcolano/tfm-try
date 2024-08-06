@@ -275,29 +275,38 @@ class dataloader(Dataset):
                 similarities.append((mesh_img_path, sim))
             similarities.sort(key=lambda x: x[1], reverse=True)
 
-            #num_mesh_images=min(self.num_mesh_images, len(ref_mesh_path))
-            #top_similar_indices = np.argsort(similarities)[-num_mesh_images:]
+            num_mesh_images=min(self.num_mesh_images, len(ref_mesh_path))
+            top_similar_indices = np.argsort(similarities)[-num_mesh_images:]
+            top_similar_paths = [ref_mesh_path[i] for i in top_similar_indices]
+
+            all_indices = np.arange(len(ref_mesh_path))
+            remaining_indices = np.setdiff1d(all_indices, top_similar_indices)
+            num_random_images = min(num_mesh_images, len(remaining_indices))
+            random_indices = np.random.choice(remaining_indices, num_random_images, replace=False)
+            random_paths = [ref_mesh_path[i] for i in random_indices]
+            selected_paths = top_similar_paths + random_paths
             #ref_mesh_path_select = [ref_mesh_path[i] for i in top_similar_indices]
             
-            selected_paths = []
-            selected_cameras = set()
+            # selected_paths = set()
+            # selected_cameras = set()
             
-            # Ensure unique camera selection in order of their SSIM scores
-            for mesh_img_path, sim in similarities:
-                camera_id = mesh_img_path.split('_')[0]
-                if camera_id not in selected_cameras:
-                    selected_paths.append(mesh_img_path)
-                    selected_cameras.add(camera_id)
-                if len(selected_paths) >= self.num_mesh_images:
-                    break
+            
+            # # Ensure unique camera selection in order of their SSIM scores
+            # for mesh_img_path, sim in similarities:
+            #     camera_id = mesh_img_path.split('_')[0]
+            #     if camera_id not in selected_cameras:
+            #         selected_paths.add(mesh_img_path)
+            #         selected_cameras.add(camera_id)
+            #     if len(selected_paths) >= self.num_mesh_images:
+            #         break
 
-            # If limit is not reached, fill with remaining highest-scoring views
-            if len(selected_paths) < self.num_mesh_images:
-                for mesh_img_path, sim in similarities:
-                    if mesh_img_path not in selected_paths:
-                        selected_paths.append(mesh_img_path)
-                        if len(selected_paths) >= self.num_mesh_images:
-                            break
+            # # If limit is not reached, fill with remaining highest-scoring views
+            # if len(selected_paths) < self.num_mesh_images:
+            #     for mesh_img_path, sim in similarities:
+            #         if mesh_img_path not in selected_paths:
+            #             selected_paths.append(mesh_img_path)
+            #             if len(selected_paths) >= self.num_mesh_images:
+            #                 break
             ref_mesh_path_select=selected_paths
             #ref_mesh_path_select = np.random.choice(ref_mesh_path, self.num_mesh_images)
             mesh = torch.stack([self.get_mesh_image_tensor(i) for i in ref_mesh_path_select if i.endswith('.png')], 0)
