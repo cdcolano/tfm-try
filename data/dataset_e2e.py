@@ -274,15 +274,12 @@ class dataloader(Dataset):
                 sim = compute_similarity(img_query_np, mesh_img_np)
                 similarities.append((mesh_img_path, sim))
             similarities.sort(key=lambda x: x[1], reverse=True)
-
             num_mesh_images=min(self.num_mesh_images, len(ref_mesh_path))
             num_sim_images = num_mesh_images // 2
             num_random_images = num_mesh_images - num_sim_images
-            top_similar_indices = np.argsort(similarities)[-num_sim_images:]
-            top_similar_paths = [ref_mesh_path[i] for i in top_similar_indices]
+            top_similar_paths = [sim[0] for sim in similarities[:num_sim_images]]
 
-            all_indices = np.arange(len(ref_mesh_path))
-            remaining_indices = np.setdiff1d(all_indices, top_similar_indices)
+            remaining_indices = np.arange(num_sim_images, len(ref_mesh_path))
             random_indices = np.random.choice(remaining_indices, num_random_images, replace=False)
             random_paths = [ref_mesh_path[i] for i in random_indices]
             selected_paths = top_similar_paths + random_paths
